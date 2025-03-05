@@ -30,9 +30,9 @@ Generate a histogram json response for of log events
 
 ## Installation
 
-Install from npm:
+Optionally install from npm:
 ```bash
-npm install mcp-solarwinds
+npm install -g mcp-solarwinds
 ```
 
 Or clone and build from source:
@@ -42,6 +42,7 @@ cd mcp-solarwinds
 npm install
 npm run build
 ```
+Or just use npx in your configurations
 
 ### For Cline VSCode Extension
 
