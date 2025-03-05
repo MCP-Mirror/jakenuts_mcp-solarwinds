@@ -14,8 +14,8 @@ Search SolarWinds Observability logs with optional filtering
 - Default search range is the last 24 hours
 
 #### visualize_logs
-Generate a histogram visualization of log events
-- Creates ASCII charts showing log frequency over time
+Generate a histogram json response for of log events
+- Formatted for Claude and canvas representations
 - Configurable time intervals (minute, hour, day)
 - Supports UTC or local time zones
 - Customizable query filters and time ranges
