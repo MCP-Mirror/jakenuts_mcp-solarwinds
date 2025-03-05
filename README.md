@@ -77,8 +77,7 @@ MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
       "args": ["-y", "mcp-solarwinds"],
       "env": {
         "SOLARWINDS_API_TOKEN": "your-api-token"
-      },
-      "autoApprove": ["search_logs", "visualize_logs"]
+      }
     }
   }
 }
@@ -100,8 +99,7 @@ If you encounter the ENOENT spawn npx issue on Windows, use this alternative con
       ],
       "env": {
         "SOLARWINDS_API_TOKEN": "your-api-token"
-      },
-      "autoApprove": ["search_logs", "visualize_logs"]
+      }
     }
   }
 }
