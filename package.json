@@ -1,6 +1,6 @@
 {
   "name": "mcp-solarwinds",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "MCP server for SolarWinds Observability logs",
   "main": "build/index.js",
   "types": "build/index.d.ts",
