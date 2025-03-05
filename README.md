@@ -1,4 +1,4 @@
-# SolarWinds Observability MCP Server
+# SolarWinds Logs MCP Server
 
 A Model Context Protocol (MCP) server for accessing and visualizing SolarWinds Observability logs.
 

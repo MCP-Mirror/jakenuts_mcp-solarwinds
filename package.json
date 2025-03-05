@@ -27,7 +27,7 @@
     "search",
     "model-context-protocol"
   ],
-  "author": "",
+  "author": "jakenuts",
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.5.0",
