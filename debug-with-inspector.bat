@@ -1,0 +1,3 @@
+@echo off
+echo Installing MCP Inspector...
+npx -y @modelcontextprotocol/inspector node build/index.js

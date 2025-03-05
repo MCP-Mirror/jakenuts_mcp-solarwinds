@@ -1,0 +1,274 @@
+Tour
+Product
+Pricing
+Blog
+Contact
+Request Demo
+Log In
+Sign Up
+
+
+Administrator Guide
+
+
+
+Collect Logs
+
+
+
+Collect Logs: Apps & Services
+
+
+
+Collect Logs: Hosting Services
+
+
+
+Collect Logs: Integrations
+
+
+
+Manage Logs
+
+
+
+Send Logs for Analytics
+
+
+
+SolarWinds Users & Orgs
+
+
+
+Support and Security
+
+
+
+What's New
+
+Manage Logs > Log search API
+Log search API
+
+Apps or clients can make HTTP requests to Papertrail to programmatically search for events. Papertrail’s own papertrail-cli uses the API.
+
+The log search API endpoint is one part of Papertrail’s HTTP API. All API calls use the same authentication and request/response format. To manage account resources, such as to create groups or register new senders, see Settings API.
+
+API Endpoint
+
+The search API endpoint is https://papertrailapp.com/api/v1/events/search.json.
+
+Query parameters
+
+All parameters are optional.
+
+q: search query; return events matching this query (default: return all events)
+system_id: limit results to a specific system (accepts ID or name)
+group_id: limit results to a specific group (accepts ID only)
+min_id or min_time: the oldest message ID or timestamp to examine
+max_id or max_time: the newest message ID or timestamp to examine
+limit: maximum messages to return (default 1000, maximum 10,000)
+tail: search approach to use
+
+Timestamps for min_time and max_time should be in epoch time UTC.
+
+Tail search
+
+The tail parameter is intended for use when implementing live tail search. It defaults to true when min_id is provided and neither max_id nor max_time is provided, because that format is typical when the intent is to retrieve recent logs. It changes the search approach to prioritize event recency over completeness; otherwise, a live tail implementation might get behind if the rate of new messages was high.
+
+If tail is set to true with other parameter combinations, it has minimal effect, and this usage isn’t recommended. To retrieve recent events but prioritize completeness instead, specify tail=false.
+
+Example requests
+Basic querying
+
+Request the 1000 most recent events:
+
+$ curl -v -H "X-Papertrail-Token: abc123" https://papertrailapp.com/api/v1/events/search.json
+
+Search for events containing error:
+
+$ curl -v -H "X-Papertrail-Token: abc123" https://papertrailapp.com/api/v1/events/search.json?q=error
+Advanced querying
+
+All search queries that work in the Papertrail Web interface also work in the API.
+
+Parameters should be URL-encoded, as is standard for GET query strings. For example, the search string:
+
+ssh OR ("authentication failure" AND success)
+
+would create this request:
+
+$ curl -v -H "X-Papertrail-Token: abc123" https://papertrailapp.com/api/v1/events/search.json?q=ssh%20OR%20%28%22authentication%20failure%22%20AND%20success%29
+
+Searching for the simpler phrase Critical error:
+
+$ curl -v -H "X-Papertrail-Token: abc123" https://papertrailapp.com/api/v1/events/search.json?q=%27Critical%20error%27
+Constraining Scope
+
+To limit results to a specific group or system, include system_id or group_id in the query string. For example:
+
+$ curl -v -H "X-Papertrail-Token: abc123" 'https://papertrailapp.com/api/v1/events/search.json?q=unable&system_id=1234'
+
+searches system ID 1234 for unable, and
+
+$ curl -v -H "X-Papertrail-Token: abc123" 'https://papertrailapp.com/api/v1/events/search.json?q=SELECT&group_id=2345'
+
+searches group ID 2345 for SELECT.
+
+Unique system names (name in the system JSON hash; see Systems LIST) that contain only numbers, letters, and underscores can be used for system_id as well. This can simplify linking to results for a single system, since no name-to-mapping API query is necessary. For example:
+
+$ curl -v -H "X-Papertrail-Token: abc123" 'https://papertrailapp.com/api/v1/events/search.json?system_id=www42&q=user'
+
+would search system www42 for user.
+
+Constraining time
+
+To search only a particular time range, provide a minimum and/or maximum event ID or time. For example, to retrieve events from Monday, June 19 2017 at 9:35 am Pacific to Monday, June 19 2017 at 9:40am Pacific, the Pacific times are first converted to epoch time format, then added as query parameters:
+
+$ curl -v -H "X-Papertrail-Token: abc123" 'https://papertrailapp.com/api/v1/events/search.json?min_time=1497890100&max_time=1497890400'
+Responses
+
+The search endpoint returns a JSON object containing these keys:
+
+events: an array of hashes of log events (one hash per event)
+min_id: the lowest event ID examined
+max_id: the highest event ID examined
+
+In addition to min_id and max_id, the response object may also contain min_time_at or max_time_at. These are the oldest or newest timestamps searched during this request. These keys are useful for displaying the time the search spanned in a human-friendly way, but since multiple events may have occured during the same second, they should not be used to select a time range for subsequent queries.
+
+Event keys
+
+Within each log event hash, the following keys are included:
+
+id: unique Papertrail event ID (64-bit integer as JSON string)
+generated_at: time that the log event was generated (ISO 8601 timestamp)
+received_at: time that Papertrail received the log event (ISO 8601 timestamp)
+display_received_at: time that Papertrail received the log event (formatted date-time string)
+source_name: sender name in Papertrail (string)
+hostname: hostname of the message (string)
+source_id: unique Papertrail sender ID (32-bit integer)
+source_ip: IP address that originated this log event (string)
+facility: syslog facility (string)
+severity: syslog severity (string)
+program: syslog “tag” field, more commonly called program (string)
+message: log event message (string)
+Data types
+events will be an empty array ([]) if no events were found matching the query.
+received_at and display_received_at are in the time zone of the API token owner (set in the profile).
+The id value is a string, because Papertrail uses 64-bit event IDs, and JavaScript only has native support up to 32-bit integer values.
+The id values for a series of events indicate relative event order and will only increase, but id values are not sequential.
+program may be null if not defined by the event.
+An empty message is a blank string ('').
+Result set types
+
+Each search query will return one of three types of result sets. The client can use the type to decide what to do next. The 3 possible types are:
+
+when searching backward: a full set of matching log messages with reached_beginning set to true. All matching events from the set max_id or max_time back to the beginning of searchable retention were examined.
+when searching forward: a full set of matching log messages with reached_end set to true. All matching events from the set min_id or min_time up to the present were examined.
+a limit-size set of matching log messages (default 1000). The events array contains these elements, and reached_record_limit is included in the result.
+a partial set of matching messages with reached_time_limit set to true. Papertrail’s per-request time limit was reached before a full set of events was found.
+
+Per-request time limit
+
+Papertrail’s workload varies significantly based on the number of possible events and the complexity of the query. To ensure that the caller does not block forever, the search API automatically enforces a per-request time limit of about 5 seconds. When the response contains reached_time_limit, this time limit expired before the full set of results was returned.
+
+Examples
+
+Events, reached beginning
+
+{
+"min_id": "7711561783320576",
+"max_id": "7711582041804800",
+"events": [
+{
+"hostname": "abc",
+"received_at": "2011-05-18T20:30:02-07:00",
+"severity": "Info",
+"facility": "Cron",
+"source_id": 2,
+"message": "message body",
+"program": "CROND",
+"source_ip": "208.75.57.121",
+"display_received_at": "May 18 20:30:02",
+"id": 7711561783320576,
+"source_name": "abc"
+},
+{
+"hostname": "def",
+"received_at": "2011-05-18T20:30:02-07:00",
+"severity": "Info",
+"facility": "Cron",
+"source_id": 19,
+"message": "A short event",
+"program": "CROND",
+"source_ip": "208.75.57.120",
+"display_received_at": "May 18 20:30:02",
+"id": 7711562567655424,
+"source_name": "server1"
+}
+],
+"reached_beginning": true
+}
+
+No events (reached beginning)
+
+{
+"min_id":"811435198242832388",
+"max_id":"812522210429444144",
+"events":[],
+"reached_beginning":true,
+"min_time_at":"2017-06-13T17:00:49-07:00"
+}
+
+Events, reached time limit
+
+{
+"min_id":"812519612313911352",
+"max_id":"812521233945083916",
+"events":["...some number of events here..."],
+"reached_time_limit":true,
+"min_time_at":"2017-06-16T16:49:48-07:00"}
+
+Events, reached record limit
+
+{
+"min_id":"812520720696492064",
+"max_id":"812520758218723347",
+"events":["...1000 events here..."],
+"reached_record_limit":true,
+"min_time_at":"2017-06-16T16:54:18-07:00"
+}
+Implementing search behavior
+Retrieving current logs (live tail)
+
+Clients may implement a “live tail” (tail -f-style) display by performing multiple successive searches for the same search query (or no search query).
+
+For the first request, do not provide a min or max ID. Papertrail’s response will contain both min_id (oldest message returned) and max_id (newest message returned).
+For subsequent requests, use the returned max_id (newest message seen) and pass it back as min_id. Passing in a min_id says “Give me messages newer than this ID”, so the result includes messages not previously seen.
+When the search query changes, start a fresh tail by omitting min_id.
+If events are coming in more quickly than they can be retrieved, this algorithm will never fall behind, but might skip some results. If accuracy is more important than timeliness, then set tail=false or use one of the options below.
+Retrieving older events
+
+To get older events (rather than current events), pass a max_id or max_time to Papertrail and it will return the most recent events that are older than that ID or time.
+
+To scroll back through progressively older events (similar to the behavior of the Papertrail viewer filling in older events over time once it finds recent results), pass the min_id from the Papertrail response back in as the max_id for the next request.
+
+Retrieving events for a time period
+
+For the first request, supply the two endpoint times, in epoch time, as min_time and max_time. Papertrail may search the entire timespan in the initial request and return all of the results.
+
+If there are too many results for a single response, or the per-request time expired before the search was complete, subsequent resquests should move backward through older events until the earliest desired time is reached. There are a number of ways to implement this; here are two relatively simple ones:
+
+Use the returned min_id (oldest event returned) and pass it back as max_id, while maintaining the same min_time parameter. Because of the presence of the min_time parameter, the subsequent response will include the previous oldest event reached as the latest event; simply discard it, as it was previously retrieved.
+Do the same but remove the min_time parameter in subsequent requests, preventing event overlap. For each subsequent response, compare the min_time_at parameter to the desired start time, and stop when that time is reached, discarding any events with earlier times.
+
+A reference implementation is also available in the Papertrail CLI.
+
+Questions
+
+If you have any questions about how to handle incomplete result sets or implement a particular style of search, contact us.
+
+The scripts are not supported under any SolarWinds support program or service. The scripts are provided AS IS without warranty of any kind. SolarWinds further disclaims all warranties including, without limitation, any implied warranties of merchantability or of fitness for a particular purpose. The risk arising out of the use or performance of the scripts and documentation stays with you. In no event shall SolarWinds or anyone else involved in the creation, production, or delivery of the scripts be liable for any damages whatsoever (including, without limitation, damages for loss of business profits, business interruption, loss of business information, or other pecuniary loss) arising out of the use of or inability to use the scripts or documentation.
+
+Datasheet Help Contact @papertrailapp Legal Documents California Privacy Rights Software Services Agreement Privacy Notice GDPR Resource Center SolarWinds Subscription Center COVID-19 Resource Center
+
+© 2025 SolarWinds Worldwide, LLC. All rights reserved.

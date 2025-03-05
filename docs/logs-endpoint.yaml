@@ -1,0 +1,104 @@
+baseUrl: https://api.na-01.cloud.solarwinds.com/v1
+
+logs:
+  get:
+    path: /v1/logs
+    summary: "Search logs"
+    description: "Search logs within a specified time period."
+    parameters:
+      - name: filter
+        in: query
+        type: string
+        required: false
+        description: "A search query string."
+      - name: group
+        in: query
+        type: string
+        required: false
+        description: "Filter logs by a specific group name."
+      - name: entityId
+        in: query
+        type: string
+        required: false
+        description: "Filter logs by a specific entity ID."
+      - name: startTime
+        in: query
+        type: string
+        required: false
+        description: "UTC start time (ISO 8601 format)."
+      - name: endTime
+        in: query
+        type: string
+        required: false
+        description: "UTC end time (ISO 8601 format)."
+      - name: direction
+        in: query
+        type: string
+        required: false
+        default: "backward"
+        description: "Sort order: 'backward', 'forward', or 'tail'. Defaults to 'backward'."
+      - name: pageSize
+        in: query
+        type: integer
+        required: false
+        description: "Max records per page."
+      - name: skipToken
+        in: query
+        type: string
+        required: false
+        description: "Token to skip to the next page of results."
+    responses:
+      200:
+        description: "List of matching logs plus pagination info."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logs:
+                  type: array
+                  description: "Array of log event objects."
+                pageInfo:
+                  type: object
+                  description: "Pagination data."
+
+logArchives:
+  get:
+    path: /v1/logs/archives
+    summary: "Retrieve log archives"
+    description: "Obtain a list of log archives and their metadata within a time period."
+    parameters:
+      - name: startTime
+        in: query
+        type: string
+        required: false
+        description: "UTC start time (ISO 8601 format)."
+      - name: endTime
+        in: query
+        type: string
+        required: false
+        description: "UTC end time (ISO 8601 format)."
+      - name: pageSize
+        in: query
+        type: integer
+        required: false
+        description: "Max records per page."
+      - name: skipToken
+        in: query
+        type: string
+        required: false
+        description: "Token to skip to the next page of results."
+    responses:
+      200:
+        description: "List of log archives plus pagination info."
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                logArchives:
+                  type: array
+                  description: "Array of log archive objects."
+                pageInfo:
+                  type: object
+                  description: "Pagination data."

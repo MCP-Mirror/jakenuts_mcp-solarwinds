@@ -1,0 +1,55 @@
+{
+  "name": "mcp-solarwinds",
+  "version": "0.1.0",
+  "description": "MCP server for SolarWinds Observability logs",
+  "main": "build/index.js",
+  "types": "build/index.d.ts",
+  "bin": {
+    "mcp-solarwinds": "build/index.js"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "postbuild": "node -e \"try { require('fs').chmodSync('build/index.js', '755'); } catch (e) { console.log('Skipping chmod on Windows'); }\"",
+    "start": "node build/index.js",
+    "dev": "npx ts-node src/index.ts",
+    "lint": "eslint . --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build",
+    "build:manual": "node build-script.js",
+    "debug:inspector": "npx -y @modelcontextprotocol/inspector node build/index.js",
+    "setup": "npm install && npm run build && echo \"Setup complete! Add the configuration to your MCP settings file.\""
+  },
+  "keywords": [
+    "mcp",
+    "solarwinds",
+    "observability",
+    "logs",
+    "search",
+    "model-context-protocol"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.5.0",
+    "axios": "^1.6.7",
+    "date-fns": "^2.30.0",
+    "date-fns-tz": "^2.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "@typescript-eslint/eslint-plugin": "^7.0.1",
+    "@typescript-eslint/parser": "^7.0.1",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "build/**/*"
+  ],
+  "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af"
+}
