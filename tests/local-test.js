@@ -49,29 +49,53 @@ async function main() {
     // Create the API client
     const apiClient = new SolarWindsApiClient(apiToken);
     
-    // Set up search parameters
-    const searchParams = {
-      filter: 'error', // Search for logs containing "error"
-      pageSize: 5,     // Limit to 5 results
-      direction: 'backward' // Sort from oldest to newest
-    };
+    // Test different search queries
+    const searchQueries = [
+      // Try with just "SpinGeneration" to see if we get any results
+      'SpinGeneration',
+      // Try with partial ID
+      'SpinGeneration-19be7485',
+      // Try searching for "correlationId" field
+      'correlationId',
+      // Try searching for "Context" field
+      'Context',
+      // Try searching for "SpinGeneration" in different fields
+      'Context:SpinGeneration',
+      'correlationId:SpinGeneration'
+    ];
     
-    console.log('Searching for logs...');
-    console.log('Parameters:', searchParams);
-    
-    // Search for logs
-    const response = await apiClient.searchEvents(searchParams);
-    
-    // Display the results
-    console.log(`\nFound ${response.logs.length} logs:`);
-    console.log('-----------------------------------');
-    
-    for (const log of response.logs) {
-      console.log(`[${log.time}] ${log.hostname} ${log.program || ''}: ${log.message}`);
+    for (const query of searchQueries) {
+      console.log(`\n\n========== Testing query: "${query}" ==========`);
+      
+      // Set up search parameters
+      const searchParams = {
+        filter: query,
+        pageSize: 5,
+        direction: 'backward'
+      };
+      
+      console.log('Parameters:', searchParams);
+      
+      try {
+        // Search for logs
+        const response = await apiClient.searchEvents(searchParams);
+        
+        // Display the results
+        console.log(`\nFound ${response.logs.length} logs:`);
+        
+        if (response.logs.length > 0) {
+          console.log('-----------------------------------');
+          for (const log of response.logs) {
+            console.log(`[${log.time}] ${log.hostname} ${log.program || ''}: ${log.message}`);
+          }
+        }
+        
+        console.log('\nPagination info:');
+        console.log(response.pageInfo);
+      } catch (error) {
+        console.error(`Error with query "${query}":`, error.message);
+      }
     }
-    
-    console.log('\nPagination info:');
-    console.log(response.pageInfo);
     
   } catch (error) {
     console.error('Error:', error.message);

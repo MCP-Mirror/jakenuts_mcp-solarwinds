@@ -16,11 +16,11 @@ export interface SolarWindsConfig {
  * SolarWinds Observability logs search parameters schema
  */
 export const searchParamsSchema = {
-  filter: z.string().optional().describe('A search query string'),
+  filter: z.string().optional().describe('A search query string. Use AND/OR operators to combine terms (e.g., "error AND timeout"). The search is performed across all fields including message, hostname, program, and nested JSON fields like Context.CorrelationId. Field-specific queries like "field:value" are not supported.'),
   group: z.string().optional().describe('Filter logs by a specific group name'),
   entityId: z.string().optional().describe('Filter logs by a specific entity ID'),
-  startTime: z.string().optional().describe('UTC start time (ISO 8601 format), defaults to 24 hours ago'),
-  endTime: z.string().optional().describe('UTC end time (ISO 8601 format), defaults to current time'),
+  startTime: z.string().optional().describe('UTC start time (ISO 8601 format)'),
+  endTime: z.string().optional().describe('UTC end time (ISO 8601 format)'),
   direction: z.enum(['backward', 'forward', 'tail']).default('backward').describe('Sort order: backward (oldest to newest), forward (newest to oldest), or tail (oldest to newest)'),
   pageSize: z.number().optional().default(50).describe('Maximum messages to return per page'),
   skipToken: z.string().optional().describe('Token to skip to the next page of results')

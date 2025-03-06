@@ -1,6 +1,6 @@
 import { SolarWindsApiClient } from '../api-client.js';
 import { generateHistogram, generateAsciiChart } from '../utils/histogram.js';
-import { HistogramOptions } from '../utils/types.js';
+import { HistogramOptions, SolarWindsSearchParams } from '../utils/types.js';
 
 /**
  * Visualize SolarWinds Observability logs as a histogram
@@ -19,15 +19,15 @@ export async function visualizeLogs(
     oneDayAgo.setDate(oneDayAgo.getDate() - 1);
     
     // Set up search parameters
-    const searchParams = {
+    const searchParams: SolarWindsSearchParams = {
       filter: args.filter,
       entityId: args.entityId,
       group: args.group,
-      // Default to searching the last 24 hours if no time range is specified
-      startTime: args.startTime !== undefined ? args.startTime : oneDayAgo.toISOString(),
-      endTime: args.endTime !== undefined ? args.endTime : now.toISOString(),
       pageSize: args.pageSize || 1000,
-      direction: 'backward' as const // Always use backward for visualization to get oldest to newest
+      direction: 'backward', // Always use backward for visualization to get oldest to newest
+      // Histograms always need a time range to be meaningful
+      startTime: args.startTime !== undefined ? args.startTime : oneDayAgo.toISOString(),
+      endTime: args.endTime !== undefined ? args.endTime : now.toISOString()
     };
 
     // Set up histogram options
