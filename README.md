@@ -2,7 +2,13 @@
 
 A Model Context Protocol (MCP) server for accessing and visualizing SolarWinds Observability logs.
 
-## Features
+## Note - 
+
+This server is currently incomplete as it does not support 
+structured data search (a limitation of the REST API?). I'm
+uncertain if it also needs to accept a data center to use
+in the api endpoint calls. Will address both when time allows 
+(needed it for a real work problem, have to fix that first)
 
 ### Tools
 
